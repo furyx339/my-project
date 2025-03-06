@@ -2,6 +2,8 @@ package com.example.myproject.service;
 
 import com.example.myproject.model.ErrorLog;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.*;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class ErrorLogsResponse {
             errorLogResponse.id = errorLog.getId();
             errorLogResponse.lang = errorLog.getLanguage();
             errorLogResponse.msg = errorLog.getMessage();
+            
+            // Since stacktrace and context are JsonNode types in the ErrorLog model,
+            // we can directly assign them without type conversion
             errorLogResponse.st = errorLog.getStacktrace();
             errorLogResponse.context = errorLog.getContext();
 
@@ -40,13 +45,12 @@ public class ErrorLogsResponse {
     public ErrorLogsResponse() {
     }
 
-    public ErrorLogsResponse(Long id, String lang, JsonNode st, String msg, JsonNode context) {
+    public ErrorLogsResponse(Long id, String lang, String msg, JsonNode st, JsonNode context) {
         this.id = id;
         this.lang = lang;
         this.msg = msg;
         this.st = st;
         this.context = context;
-
     }
 
     public Long getId() {

@@ -1,24 +1,52 @@
 services:
-  springboot-app:
+  spring-boot-app:
+    container_name: myproject-app
     image: myproject
     restart: always
+    stdin_open: true
+    tty: true
     build:
       dockerfile: Dockerfile
       context: .
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3306/myDB?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/myDB?useSSL=false&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=8063anto.
+    working_dir: /app
+    volumes:
+#      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.m2:/root/.m2
     depends_on:
       - mysqldb
+    networks:
+      - my_project_network
 
   mysqldb:
+    image: mysql:8.0
     container_name: mysqldb
-    image: mysql
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+    restart: always
+    command:
+      - "--default-authentication-plugin=mysql_native_password"
+      - "--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
     environment:
-      MYSQL_DATABASE: myDB
       MYSQL_ROOT_PASSWORD: 8063anto.
+#      MYSQL_USER: root
+      MYSQL_PASSWORD: 8063anto.
+      MYSQL_DATABASE: myDB
+    networks:
+      - my_project_network
+
+volumes:
+  mysql_data: {}
+networks:
+  my_project_network:
+    name: my_project_network
+    external: true
